@@ -5,6 +5,7 @@ class Controller:
     def __init__(self):
         self.control = cursor
         self.database = database
+        self.get_data = self.get_table_data()
 
     def new_user(self):
         user_name = input("[?] Enter user name:\n")
@@ -42,25 +43,13 @@ class Controller:
         return print('[OK] User has been deleted.')
 
     def get_user(self):
-        sql = "SHOW COLUMNS FROM users"
-        self.control.execute(sql)
-        columns = []
-        count = 0
-        for res in self.control.fetchall():
-            columns.append(
-                {
-                    count: res[0]
-                }
-            )
-            count += 1
-        print("[!] Allowed columns:")
-        for i in columns:
-            print(i)
-        search_column = int(input(f"[?] Enter column to search user: \n"))
+        search_column, columns = self.get_data[0], self.get_data[1]
         try:
-            val = (input("Enter value:\n") if columns[search_column][search_column] != 'salary' else
-                   int(input("Enter value:\n")), )
-            sql = 'SELECT * FROM users WHERE {column_name} = "%s"'.format(
+            if columns[search_column][search_column] != 'salary' or columns[search_column][search_column] != 'id':
+                val = (input("[?] Enter replace data:\n").lower, )
+            else:
+                val = (int(input("[?] Enter replace data:\n")))
+            sql = 'SELECT * FROM users WHERE {column_name} = LOWER("%s")'.format(
                 column_name=columns[search_column][search_column]
             )
             self.control.execute(sql, val)
@@ -74,6 +63,51 @@ class Controller:
         except IndexError:
             return print('[X]! No such column.')
 
+    def get_table_data(self):
+        sql = "SHOW COLUMNS FROM users"
+        self.control.execute(sql)
+        columns = []
+        count = 0
+        for res in self.control.fetchall():
+            columns.append(
+                {
+                    count: res[0]
+                }
+            )
+            count += 1
+        print("[!] Allowed columns:")
+        [print(i) for i in columns]
+        try:
+            search_column = int(input(f"[?] Enter column to search user: \n"))
+        except ValueError:
+            return 0
+        answer = (search_column, columns)
+        return answer
+
+    def update_user(self):
+        search_column, columns = self.get_data[0], self.get_data[1]
+        try:
+            replace_column = int(input("[?] Enter column to change:\n"))
+        except ValueError:
+            print("[X] Answer must be an integer.")
+            return 0
+        if columns[search_column][search_column] == 'id' or columns[search_column][search_column] == 'salary':
+            where_data = int(input('[?] Enter search data:\n'))
+        else:
+            where_data = input('[?] Enter search data:\n')
+        if columns[replace_column][replace_column] == 'id' or columns[replace_column][replace_column]:
+            new_data = int(input('[?] Enter replace data:\n'))
+        else:
+            new_data = input('[?] Enter replace data:\n')
+        sql = 'UPDATE users SET {0} = "%s" WHERE {1} = "%s"'.format(
+            columns[replace_column][replace_column],
+            columns[search_column][search_column]
+        )
+        val = (new_data, where_data)
+        self.control.execute(sql, val)
+        self.database.commit()
+        return print("[OK] User has been updated.")
+
 
 a = Controller()
-a.get_user()
+a.update_user()
