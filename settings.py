@@ -2,7 +2,7 @@
 
 
 db_name = 'company'
-password = '756756'
+password = ''
 user = 'root'
 host = 'localhost'
 auto_commit = True
