@@ -1,13 +1,18 @@
 from db_creating.connection import cursor, database
+from mysql.connector import Error
 
 
 class Controller:
+    """Users table control class"""
     def __init__(self):
         self.control = cursor
         self.database = database
-        self.get_data = self.get_table_data()
+
+    def __str__(self):
+        return f"{self.database}"
 
     def new_user(self):
+        """User add function"""
         user_name = input("[?] Enter user name:\n")
         user_surname = input("[?] Enter user surname:\n")
         user_patronymic = input("[?] Enter user patronymic:\n")
@@ -28,22 +33,29 @@ class Controller:
                   user_position,
                   user_department
               )
-        self.control.execute(sql, val)
-        self.database.commit()
+        try:
+            self.control.execute(sql, val)
+        except Error:
+            print(f"[X] {Error}")
         return print('[OK] New user has been added.')
 
     def delete_user(self):
+        """Delete user function"""
         user_name = input("[?] Enter username:\n")
         user_surname = input("[?] Enter surname:\n")
         user_address = input("[?] Enter address:\n")
         sql = 'DELETE FROM users WHERE name = "%s" AND  surname = "%s" AND adress = "%s"'
         val = (user_name, user_surname, user_address)
-        self.control.execute(sql, val)
-        self.database.commit()
+        try:
+            self.control.execute(sql, val)
+        except Error:
+            print(f"[X] {Error}")
         return print('[OK] User has been deleted.')
 
     def get_user(self):
-        search_column, columns = self.get_data[0], self.get_data[1]
+        """Find users function"""
+        get_data = self.get_table_data()
+        search_column, columns = get_data[0], get_data[1]
         try:
             if columns[search_column][search_column] != 'salary' or columns[search_column][search_column] != 'id':
                 val = (input("[?] Enter replace data:\n").lower, )
@@ -64,6 +76,7 @@ class Controller:
             return print('[X]! No such column.')
 
     def get_table_data(self):
+        """Get table columns function"""
         sql = "SHOW COLUMNS FROM users"
         self.control.execute(sql)
         columns = []
@@ -85,7 +98,9 @@ class Controller:
         return answer
 
     def update_user(self):
-        search_column, columns = self.get_data[0], self.get_data[1]
+        """Update user info function"""
+        get_data = self.get_table_data()
+        search_column, columns = get_data[0], get_data[1]
         try:
             replace_column = int(input("[?] Enter column to change:\n"))
         except ValueError:
@@ -104,10 +119,25 @@ class Controller:
             columns[search_column][search_column]
         )
         val = (new_data, where_data)
-        self.control.execute(sql, val)
-        self.database.commit()
+        try:
+            self.control.execute(sql, val)
+        except Error:
+            print(f"[X] {Error}")
         return print("[OK] User has been updated.")
+
+    def get_all_users(self):
+        """Get all users info function"""
+        sql = "SELECT * FROM users"
+        try:
+            self.control.execute(sql)
+        except Error:
+            print(f"[X] {Error}")
+            return 0
+        print("[OK] List of users:")
+        for i in self.control.fetchall():
+            print(i)
+        return print("[OK] Request successful.")
 
 
 a = Controller()
-a.update_user()
+a.get_all_users()
