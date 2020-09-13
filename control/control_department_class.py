@@ -46,15 +46,22 @@ class DepartmentController:
         return print(f"[OK] Department '{val[0]}' has been deleted.")
 
     def get_all_departments(self):
-        sql = 'SELECT * FROM department'
+        sql = 'SELECT name FROM department'
         try:
             self.control.execute(sql)
         except Error:
             print(f"[X] {Error}")
             return 1
+        answer = {}
+        counter = 1
         for i in self.control.fetchall():
-            print(i)
-        return print("[OK] Request successful.")
+            answer.update(
+                {
+                    counter: str(i[0]).replace("'", "")
+                }
+            )
+            counter += 1
+        return answer
 
 
 a = DepartmentController()

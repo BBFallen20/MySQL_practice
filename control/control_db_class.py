@@ -1,5 +1,6 @@
 from db_creating.connection import cursor, database
 from mysql.connector import Error
+from control.control_department_class import DepartmentController
 
 
 class Controller:
@@ -20,7 +21,18 @@ class Controller:
         user_address = input("[?] Enter user address:\n")
         user_salary = int(input("[?] Enter user salary:\n"))
         user_position = input("[?] Enter user position:\n")
-        user_department = input("[?] Enter user department:\n")
+        print("Departments:")
+        if DepartmentController().get_all_departments():
+            print(DepartmentController().get_all_departments())
+        else:
+            return print("[X] Create at least one department.")
+        try:
+            question = int(input("[?] Enter user department:\n"))
+            user_department = DepartmentController().get_all_departments()[question]
+        except IndexError:
+            return print("[X] No such department.")
+        except ValueError:
+            return print("[X] Answer must be an integer.")
         sql = 'INSERT INTO users(name, surname, patronymic, birth_date, adress, salary, position, department) VALUES ' \
               '("%s","%s","%s",STR_TO_DATE(REPLACE("%s", "\'", ""),"%Y-%m-%d"),"%s","%s","%s","%s")'
         val = (
@@ -49,7 +61,7 @@ class Controller:
         try:
             self.control.execute(sql, val)
         except Error:
-            print(f"[X] {Error}")
+            return print(f"[X] {Error}")
         return print('[OK] User has been deleted.')
 
     def get_user(self):
@@ -57,13 +69,17 @@ class Controller:
         get_data = self.get_table_data()
         search_column, columns = get_data[0], get_data[1]
         try:
-            if columns[search_column][search_column] != 'salary' or columns[search_column][search_column] != 'id':
-                val = (input("[?] Enter replace data:\n").lower, )
+            if columns[search_column] != 'salary' and columns[search_column] != 'id':
+                val = (input("[?] Enter search data:\n"), )
+                sql = 'SELECT * FROM users WHERE {column_name} = "%s"'.format(
+                    column_name=columns[search_column]
+                )
             else:
-                val = (int(input("[?] Enter replace data:\n")))
-            sql = 'SELECT * FROM users WHERE {column_name} = LOWER("%s")'.format(
-                column_name=columns[search_column][search_column]
-            )
+                val = (int(input("[?] Enter search data:\n")), )
+                sql = 'SELECT * FROM users WHERE {column_name} = %s'.format(
+                    column_name=columns[search_column]
+                )
+
             self.control.execute(sql, val)
             answer = self.control.fetchall()
             if answer:
@@ -79,17 +95,17 @@ class Controller:
         """Get table columns function"""
         sql = "SHOW COLUMNS FROM users"
         self.control.execute(sql)
-        columns = []
+        columns = {}
         count = 0
         for res in self.control.fetchall():
-            columns.append(
+            columns.update(
                 {
                     count: res[0]
                 }
             )
             count += 1
         print("[!] Allowed columns:")
-        [print(i) for i in columns]
+        print(columns)
         try:
             search_column = int(input(f"[?] Enter column to search user: \n"))
         except ValueError:
@@ -106,17 +122,17 @@ class Controller:
         except ValueError:
             print("[X] Answer must be an integer.")
             return 0
-        if columns[search_column][search_column] == 'id' or columns[search_column][search_column] == 'salary':
+        if columns[search_column] == 'id' or columns[search_column] == 'salary':
             where_data = int(input('[?] Enter search data:\n'))
         else:
             where_data = input('[?] Enter search data:\n')
-        if columns[replace_column][replace_column] == 'id' or columns[replace_column][replace_column]:
+        if columns[replace_column] == 'id' or columns[replace_column]:
             new_data = int(input('[?] Enter replace data:\n'))
         else:
             new_data = input('[?] Enter replace data:\n')
         sql = 'UPDATE users SET {0} = "%s" WHERE {1} = "%s"'.format(
-            columns[replace_column][replace_column],
-            columns[search_column][search_column]
+            columns[replace_column],
+            columns[search_column]
         )
         val = (new_data, where_data)
         try:
@@ -140,4 +156,4 @@ class Controller:
 
 
 a = Controller()
-a.get_all_users()
+a.get_user()
