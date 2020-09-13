@@ -1,0 +1,6 @@
+mysql-connector-python == 8.0.21
+pip == 20.2.3
+pylint == 2.6.0
+setuptools == 50.3.0
+toml == 0.10.1
+urllib3 == 1.25.10

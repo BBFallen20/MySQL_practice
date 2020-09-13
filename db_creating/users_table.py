@@ -1,5 +1,8 @@
 from db_creating.connection import cursor
-from mysql.connector import ProgrammingError
+from mysql.connector import Error
+"""Database 'users' table creation"""
+
+
 try:
     cursor.execute("""CREATE TABLE IF NOT EXISTS users
         (
@@ -9,10 +12,10 @@ try:
         patronymic VARCHAR(255) NOT NULL ,
         position VARCHAR(255) NOT NULL ,
         birth_date DATE,
-        adress VARCHAR(255) NOT NULL ,
+        address VARCHAR(255) NOT NULL ,
         salary INT NOT NULL ,
         department VARCHAR(255) NOT NULL 
         )""")
-except ProgrammingError:
+except Error:
     print('[X]! Error with table creating. Check settings')
 

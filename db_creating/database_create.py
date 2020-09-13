@@ -1,5 +1,7 @@
 import mysql.connector
-from mysql.connector import DatabaseError
+from mysql.connector import Error
+"""Database creation file."""
+
 
 connection = mysql.connector.connect(
     host='localhost',
@@ -11,5 +13,5 @@ cursor = connection.cursor()
 
 try:
     cursor.execute("CREATE DATABASE IF NOT EXISTS company")
-except DatabaseError:
+except Error:
     print("[X]! Database with this name already exists. Try another name.")
